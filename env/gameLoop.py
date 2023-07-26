@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 from environment import *
 from robot import Robot
-from kalmanFilter import kalmanFilter
+from filters.kalmanFilter import kalmanFilter
 
 
 def gameLoop():
