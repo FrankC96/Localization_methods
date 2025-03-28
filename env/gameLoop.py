@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
-from environment import *
-from robot import Robot
+from env.environment import *
+from env.robot import Robot
 from filters.kalmanFilter import kalmanFilter
 
 
