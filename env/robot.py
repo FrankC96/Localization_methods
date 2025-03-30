@@ -4,58 +4,38 @@ import numpy as np
 
 class Robot:
     def __init__(self, x0: list, color: tuple, dt: float):
+        self._x = x0
+
         self.color = color
 
         self.dt = dt
-        self.vl = 0
-        self.vr = 0
+        self._u = np.array([0.0, 0.0], dtype=np.float64)
 
-        self.x = x0[0]
-        self.y = x0[1]
-        self.theta = x0[2]
-
-        self.r = []
-        self.phi = []
 
         self.A = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        self.B = np.array(
+        self.B = lambda x: np.array(
             [
-                [self.dt * np.cos(self.theta), 0],
-                [self.dt * np.sin(self.theta), 0],
+                [self.dt * np.cos(x[2]), 0],
+                [self.dt * np.sin(x[2]), 0],
                 [0, self.dt],
             ]
         )
 
     def moveRobot(self, x):
-        """
-        Nonlinear dynamical model for a differential drive robot.
-        It is formulated in matrix form, however it is not linear
-        (although we use the linear kalman filter).
-        """
-        self.A = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        self.B = np.array(
-            [
-                [self.dt * np.cos(self.theta), 0],
-                [self.dt * np.sin(self.theta), 0],
-                [0, self.dt],
-            ]
-        )
-        u = np.array([self.vl, self.vr])
-        x = self.A.dot(x) + self.B.dot(u)
+        A = self.A
+        B = self.B(self._x)
 
-        self.x = x[0]
-        self.y = x[1]
-        self.theta = x[2]
+        self._x = A.dot(x) + B.dot(self._u)
 
     def drawRobot(self, screen):
         """
         Function to draw the robot's location and bearing.
         """
-        r_x = self.x + np.cos(self.theta) * 40
-        r_y = self.y + np.sin(self.theta) * 40
+        r_x = self._x[0] + np.cos(self._x[2]) * 40
+        r_y = self._x[1] + np.sin(self._x[2]) * 40
 
-        pygame.draw.circle(screen, self.color, (self.x, self.y), 40)
-        pygame.draw.line(screen, (255, 255, 255), (self.x, self.y), (r_x, r_y), 2)
+        pygame.draw.circle(screen, self.color, (self._x[0], self._x[1]), 40)
+        pygame.draw.line(screen, (255, 255, 255), (self._x[0], self._x[1]), (r_x, r_y), 2)
 
     def getOutput(self, L):
         """
